@@ -14,18 +14,28 @@ module.exports = {
   messages: {
     get: function () {
       db.dbConnection.connect();
+      let sql = `SELECT * FROM messages`;
+      return promiseQuery(sql)
+        .then(results => {
+          db.dbConnection.end();
+          return results;
+        })
+        .catch(err => {
+          db.dbConnection.end();
+          return err;
+        });
       
-      db.dbConnection.end();
+      
     }, // a function which produces all the messages
     post: function (data) {
-      let username = data.username; //need to double check
+      let username = data.username; 
       let userSql = `SELECT id FROM users WHERE name='${username}'`;
       let userId;
       let roomname = data.roomname;
       let roomSql = `SELECT id FROM rooms WHERE name='${roomname}'`;
       let roomId;
 
-      promiseQuery(userSql)
+      return promiseQuery(userSql)
         .then(results => {
           if (results.length === 0) {
             let newUserSql = `INSERT INTO users (name)
@@ -75,8 +85,41 @@ module.exports = {
 
   users: {
     // Ditto as above.
-    get: function () {},
-    post: function () {}
+    get: function () {
+      db.dbConnection.connect();
+      let sql = `SELECT name FROM users`;
+      return promiseQuery(sql)
+        .then(results => {
+          db.dbConnection.end();
+          return results;
+        })
+        .catch(err => {
+          db.dbConnection.end();
+          return err;
+        });
+    },
+    
+    post: function (data) {
+      db.dbConnection.connect();
+      let username = data.username; 
+      let userSql = `SELECT id FROM users WHERE name='${username}'`;
+      
+      return promiseQuery(userSql)
+        .then(results => {
+          if (results.length === 0) {
+            let newUserSql = `INSERT INTO users (name)
+                  VALUES('${username}')`;
+            return promiseQuery(newUserSql)
+              .then(() => {
+                db.dbConnection.end();
+              })
+              .catch((err) => {
+                db.dbConnection.end();
+                return err;
+              });
+          }
+        });
+    }
   }
 };
 
