@@ -14,7 +14,7 @@ module.exports = {
   messages: {
     get: function () {
       db.dbConnection.connect();
-      let sql = `SELECT * FROM messages`;
+      let sql = 'SELECT * FROM messages';
       return promiseQuery(sql)
         .then(results => {
           db.dbConnection.end();
@@ -87,7 +87,7 @@ module.exports = {
     // Ditto as above.
     get: function () {
       db.dbConnection.connect();
-      let sql = `SELECT name FROM users`;
+      let sql = 'SELECT name FROM users';
       return promiseQuery(sql)
         .then(results => {
           db.dbConnection.end();
