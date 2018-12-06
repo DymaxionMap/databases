@@ -22,6 +22,7 @@ CREATE TABLE messages (
   user int,
   room int, 
   messageText text,
+  createdAt text,
   FOREIGN KEY (user) REFERENCES users (id),
   FOREIGN KEY (room) REFERENCES rooms (id)
   /* this is our main table that contains all the messages data.*/
