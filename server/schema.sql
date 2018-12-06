@@ -1,16 +1,8 @@
+DROP DATABASE chat;
+
 CREATE DATABASE chat;
 
 USE chat;
-
-CREATE TABLE messages (
-  id int AUTO_INCREMENT PRIMARY KEY,
-  user varchar(255),
-  room varchar(255), 
-  messageText text
-  FOREIGN KEY(user) references users(id),
-  FOREIGN KEY(room) references rooms(id)
-  /* this is our main table that contains all the messages data.*/
-);
 
 CREATE TABLE users (
   id int AUTO_INCREMENT PRIMARY KEY,
@@ -24,6 +16,18 @@ CREATE TABLE rooms (
 
   /* this is our room data table.*/
 );
+
+CREATE TABLE messages (
+  id int AUTO_INCREMENT PRIMARY KEY,
+  user int,
+  room int, 
+  messageText text,
+  FOREIGN KEY (user) REFERENCES users (id),
+  FOREIGN KEY (room) REFERENCES rooms (id)
+  /* this is our main table that contains all the messages data.*/
+);
+
+
 
 /* Create other tables and define schemas for them here! */
 
