@@ -1,133 +1,32 @@
-var db = require('../db');
-var mysql = require('mysql');
+// var db = require('../db');
+// var mysql = require('mysql');
+var Sequelize = require('sequelize');
+var db = new Sequelize('chat', 'student', 'student');
 
-let promiseQuery = (queryString) => new Promise((resolve, reject) => {
-  db.dbConnection.query(queryString, (err, results, fields) => {
-    if (err) {
-      reject(err);
-    }
-    resolve(results);
-  });
+var Users = db.define('Users', {
+  username: Sequelize.STRING
 });
 
-module.exports = {
-  messages: {
-    get: function () {
-      let sql = 'SELECT users.name as username, rooms.name as roomname, messages.messageText, messages.createdAt ' + 
-                  'FROM messages INNER JOIN users ON messages.user = users.id ' +
-                                'INNER JOIN rooms ON rooms.id = messages.room';
-      return promiseQuery(sql)
-        .then(results => {
-          // db.dbConnection.end();
-          return results;
-        })
-        .catch(err => {
-          // db.dbConnection.end();
-          return err;
-        });
-      
-      
-    }, // a function which produces all the messages
-    post: function (data) {
-      let username = data.username; 
-      let userSql = `SELECT id FROM users WHERE name='${username}'`;
-      let userId;
-      let roomname = data.roomname;
-      let roomSql = `SELECT id FROM rooms WHERE name='${roomname}'`;
-      let roomId;
+var Rooms = db.define('Rooms', {
+  roomname: Sequelize.STRING
+});
 
-      return promiseQuery(userSql)
-        .then(results => {
-          if (results.length === 0) {
-            let newUserSql = `INSERT INTO users (name)
-                  VALUES('${username}')`;
-            return promiseQuery(newUserSql)
-              .then(() => {
-                let getNewUserIdSql = `SELECT id FROM users WHERE name='${username}'`;
-                return promiseQuery(getNewUserIdSql);
-              })
-              .then(results => {
-                userId = results[0].id;
-              });
-          } else {
-            userId = results[0].id;
-          }
-        })
-        .then(() => {
-          return promiseQuery(roomSql);
-        })
-        .then(results => {
-          if (results.length === 0) {
-            let newRoomSql = `INSERT INTO rooms (name)
-                  VALUES('${roomname}')`;
-            return promiseQuery(newRoomSql)
-              .then(() => {
-                let getNewRoomIdSql = `SELECT id FROM rooms WHERE name='${roomname}'`;
-                return promiseQuery(getNewRoomIdSql);
-              })
-              .then(results => {
-                roomId = results[0].id;
-              });
-          } else {
-            roomId = results[0].id;
-          }
-        })
-        .then(() => {
-          let date = new Date();
-          let createMessageSql = `INSERT INTO messages (user, room, messageText, createdAt)
-                                  VALUES (${userId}, ${roomId}, '${data.text}', '${date}')`;
-          // let createMessageSql = 'INSERT INTO messages (user, room, messageText, createdAt) VALUES (8, 5, "hi", "Tuesday")';
-          console.log('message sql:', createMessageSql);
-          return promiseQuery(createMessageSql)
-            .then(() => {
-              console.log('it worked');
-              // db.dbConnection.end();
-            })
-            .catch(err => {
-              console.log('it did not work');
-              console.log(err);
-            });
-        });
-    } // a function which can be used to insert a message into the database
-  },
+var Messages = db.define('Messages', {
+  messageText: Sequelize.STRING,
+  createdAt: Sequelize.STRING
+});
 
-  users: {
-    // Ditto as above.
-    get: function () {
-      // db.dbConnection.connect();
-      let sql = 'SELECT name FROM users';
-      return promiseQuery(sql)
-        .then(results => {
-          // db.dbConnection.end();
-          return results;
-        })
-        .catch(err => {
-          // db.dbConnection.end();
-          return err;
-        });
-    },
-    
-    post: function (data) {
-      // db.dbConnection.connect();
-      let username = data.username; 
-      let userSql = `SELECT id FROM users WHERE name='${username}'`;
-      
-      return promiseQuery(userSql)
-        .then(results => {
-          if (results.length === 0) {
-            let newUserSql = `INSERT INTO users (name)
-                  VALUES('${username}')`;
-            return promiseQuery(newUserSql)
-              .then(() => {
-                // db.dbConnection.end();
-              })
-              .catch((err) => {
-                // db.dbConnection.end();
-                return err;
-              });
-          }
-        });
-    }
-  }
-};
+Messages.belongsTo(Users);
+Users.hasMany(Messages);
+
+Messages.belongsTo(Rooms);
+Rooms.hasMany(Messages);
+
+Users.sync();
+Rooms.sync();
+Messages.sync();
+
+exports.Users = Users;
+exports.Rooms = Rooms;
+exports.Messages = Messages;
 

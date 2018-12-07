@@ -3,7 +3,7 @@ var models = require('../models');
 module.exports = {
   messages: {
     get: function (req, res) {
-      models.Messages.findAll({include: [models.Users, models.Rooms]})
+      models.messages.get()
         .then(results => {
           res.status(200).send(JSON.stringify(results));
         })
@@ -13,18 +13,9 @@ module.exports = {
         });
     }, // a function which handles a get request for all messages
     post: function (req, res) {
-      models.Users.findOrCreate({where: {username: req.body.username}})
-        .spread((user, created) => {
-          models.Rooms.findOrCreate({where: {roomname: req.body.roomname}})
-            .spread((room, created) => {
-              models.Messages.create({
-                userid: user.get('id'),
-                roomid: room.get('id'),
-                messageText: req.body.text,
-                createdAt: new Date()
-              })
-                .then(() => res.sendStatus(201));
-            });
+      models.messages.post(req.body)
+        .then(() => {
+          res.status(201).send('Message posted');
         });
     } // a function which handles posting a message to the database
   },
@@ -32,7 +23,7 @@ module.exports = {
   users: {
     // Ditto as above
     get: function (req, res) {
-      models.Users.findAll()
+      models.users.get()
         .then(results => {
           res.status(200).send(JSON.stringify(results));
         })
@@ -42,11 +33,11 @@ module.exports = {
         });
     },
     post: function (req, res) {
-      models.Users.findOrCreate({ where: {username: req.body.username } })
-        .spread((user, created) => {
-          res.sendStatus(created ? 201 : 200);
+      models.users.post(req.body)
+        .then(() => {
+          res.status(201).send('User added');
         })
-        .fail(err => {
+        .catch(err => {
           res.status(500).send('Cannot add user');
         });
     }
