@@ -13,7 +13,9 @@ let promiseQuery = (queryString) => new Promise((resolve, reject) => {
 module.exports = {
   messages: {
     get: function () {
-      let sql = 'SELECT * FROM messages';
+      let sql = 'SELECT users.name as username, rooms.name as roomname, messages.messageText, messages.createdAt ' + 
+                  'FROM messages INNER JOIN users ON messages.user = users.id ' +
+                                'INNER JOIN rooms ON rooms.id = messages.room';
       return promiseQuery(sql)
         .then(results => {
           // db.dbConnection.end();
