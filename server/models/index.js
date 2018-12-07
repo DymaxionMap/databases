@@ -13,15 +13,14 @@ let promiseQuery = (queryString) => new Promise((resolve, reject) => {
 module.exports = {
   messages: {
     get: function () {
-      db.dbConnection.connect();
       let sql = 'SELECT * FROM messages';
       return promiseQuery(sql)
         .then(results => {
-          db.dbConnection.end();
+          // db.dbConnection.end();
           return results;
         })
         .catch(err => {
-          db.dbConnection.end();
+          // db.dbConnection.end();
           return err;
         });
       
@@ -75,9 +74,16 @@ module.exports = {
           let date = new Date();
           let createMessageSql = `INSERT INTO messages (user, room, messageText, createdAt)
                                   VALUES (${userId}, ${roomId}, '${data.text}', '${date}')`;
-          promiseQuery(createMessageSql)
+          // let createMessageSql = 'INSERT INTO messages (user, room, messageText, createdAt) VALUES (8, 5, "hi", "Tuesday")';
+          console.log('message sql:', createMessageSql);
+          return promiseQuery(createMessageSql)
             .then(() => {
-              db.dbConnection.end();
+              console.log('it worked');
+              // db.dbConnection.end();
+            })
+            .catch(err => {
+              console.log('it did not work');
+              console.log(err);
             });
         });
     } // a function which can be used to insert a message into the database
@@ -86,21 +92,21 @@ module.exports = {
   users: {
     // Ditto as above.
     get: function () {
-      db.dbConnection.connect();
+      // db.dbConnection.connect();
       let sql = 'SELECT name FROM users';
       return promiseQuery(sql)
         .then(results => {
-          db.dbConnection.end();
+          // db.dbConnection.end();
           return results;
         })
         .catch(err => {
-          db.dbConnection.end();
+          // db.dbConnection.end();
           return err;
         });
     },
     
     post: function (data) {
-      db.dbConnection.connect();
+      // db.dbConnection.connect();
       let username = data.username; 
       let userSql = `SELECT id FROM users WHERE name='${username}'`;
       
@@ -111,10 +117,10 @@ module.exports = {
                   VALUES('${username}')`;
             return promiseQuery(newUserSql)
               .then(() => {
-                db.dbConnection.end();
+                // db.dbConnection.end();
               })
               .catch((err) => {
-                db.dbConnection.end();
+                // db.dbConnection.end();
                 return err;
               });
           }
